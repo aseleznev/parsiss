@@ -1,0 +1,19 @@
+{
+  "name": "parsiss",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aseleznev/parsiss.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aseleznev/parsiss/issues"
+  },
+  "homepage": "https://github.com/aseleznev/parsiss#readme"
+}
