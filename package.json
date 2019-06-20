@@ -1,19 +1,23 @@
 {
   "name": "parsiss",
   "version": "1.0.0",
-  "description": "",
+  "description": "github issues parser",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aseleznev/parsiss.git"
   },
-  "author": "",
+  "author": "aseleznev",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/aseleznev/parsiss/issues"
   },
-  "homepage": "https://github.com/aseleznev/parsiss#readme"
+  "homepage": "https://github.com/aseleznev/parsiss#readme",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  }
 }

@@ -1,5 +1,6 @@
 var fetch = require("node-fetch");
 
+// получи на github->settings->developer settings->personal access tokens->generate (без галочек)
 var accessToken = "";
 
 var name = "typeorm";
@@ -28,10 +29,10 @@ function extract() {
         name: name,
         owner: owner
       }
-    })
-    // headers: {
-    //   'Authorization': `Bearer ${accessToken}`,
-    // },
+    }),
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    },
   })
     .then(res => res.json())
     .then(body => saveIssues(body))
@@ -39,5 +40,6 @@ function extract() {
 }
 
 function saveIssues(body) {
-  console.log(body);
+
+  console.log(body.data.repository.issues.nodes[0]);
 }
