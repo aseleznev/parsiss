@@ -1,18 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConfig } from 'nestjs-config';
 import { Issue } from './issue/issue.entity';
+import { IssueService } from './issue/issue.service';
 
 const fetch = require('node-fetch');
 
 @Injectable()
 export class AppService {
-  constructor(@InjectConfig() private readonly config) {
+  constructor(@InjectConfig() private readonly config, private readonly issueService: IssueService) {
     this.config = config;
   }
 
   async parse(): Promise<string> {
-    await this.receiveData();
-    return Promise.resolve('ok');
+    const issues = await this.receiveData();
+    const savedEntities = this.issueService.save(issues);
+    return Promise.resolve(JSON.stringify(savedEntities));
   }
 
   receiveData(): Promise<Issue[]> {
