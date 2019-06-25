@@ -49,6 +49,7 @@ export class AppService {
                     }
                     totalCount
                     nodes {
+                      id
                       createdAt
                       lastEditedAt
                       updatedAt
@@ -88,6 +89,7 @@ export class AppService {
         issueEntity.id = issue.id;
         issueEntity.title = issue.title;
         issueEntity.state = issue.state;
+        console.log(issueEntity);
         return issueEntity;
       })
     );

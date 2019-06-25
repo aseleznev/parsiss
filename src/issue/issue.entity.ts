@@ -2,14 +2,12 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('issue')
 export class Issue {
+    @PrimaryColumn({ type: 'varchar' })
+    id: number;
 
-  @PrimaryColumn()
-  id: number;
+    @Column()
+    title: string;
 
-  @Column()
-  title: string;
-
-  @Column()
-  state: string;
-
+    @Column()
+    state: string;
 }

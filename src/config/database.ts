@@ -8,7 +8,7 @@ export default {
   password: process.env.TYPEORM_PASSWORD,
   database: process.env.TYPEORM_DATABASE,
   schema: process.env.TYPEORM_SCHEMA,
-  entities: process.env.TYPEORM_ENTITIES.split(','),
+  entities: ['src/**/*.entity.ts'],
   migrationsRun: process.env.TYPEORM_MIGRATIONS_RUN === 'true',
   synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true'
 };
