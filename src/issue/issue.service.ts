@@ -5,13 +5,13 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class IssueService {
-  constructor(@InjectRepository(Issue) private readonly issueRepository: Repository<Issue>) {}
+    constructor(@InjectRepository(Issue) private readonly issueRepository: Repository<Issue>) {}
 
-  async save(issues: Issue[]): Promise<Issue[]> {
-    return await this.issueRepository.save(issues);
-  }
+    async save(issue: Issue): Promise<Issue> {
+        return await this.issueRepository.save(issue);
+    }
 
-  async findAll(): Promise<Issue[]> {
-    return await this.issueRepository.find();
-  }
+    async findAll(): Promise<Issue[]> {
+        return await this.issueRepository.find();
+    }
 }
