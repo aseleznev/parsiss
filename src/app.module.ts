@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from 'nestjs-config';
 import { IssueModule } from './issue/issue.module';
+import { AuthorModule } from './author/author.module';
 import * as path from 'path';
 
 @Module({
@@ -13,7 +14,8 @@ import * as path from 'path';
       useFactory: async (config: ConfigService) => config.get('database'),
       inject: [ConfigService]
     }),
-    IssueModule
+    IssueModule,
+    AuthorModule
   ],
   controllers: [AppController],
   providers: [AppService]

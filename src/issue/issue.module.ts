@@ -4,8 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Issue } from './issue.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Issue])],
-  providers: [IssueService],
-  exports: [IssueService]
+    imports: [TypeOrmModule.forFeature([Issue])],
+    providers: [IssueService],
+    exports: [IssueService]
 })
 export class IssueModule {}
