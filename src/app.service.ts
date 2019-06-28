@@ -30,7 +30,7 @@ export class AppService {
         const query = `
           query parssis($name: String!, $owner: String!) {
             repository(name: $name, owner: $owner) {
-              issues(last: 1, ${beforeIssue}) {
+              issues(last: 20, ${beforeIssue}) {
                 edges {
                   cursor
                 }
@@ -40,9 +40,9 @@ export class AppService {
                   closedAt
                   closed
                   lastEditedAt
+                  updatedAt
                   author {
-                    login
-                    __typename
+                    ...authorFields
                   }
                   state
                   title
@@ -57,8 +57,7 @@ export class AppService {
                       lastEditedAt
                       updatedAt
                       author {
-                        login
-                        __typename
+                        ...authorFields
                       }
                       bodyHTML
                     }
@@ -66,7 +65,15 @@ export class AppService {
                 }
               }
             }
-          }`;
+          }
+          fragment authorFields on Actor {
+            login
+            typename: __typename
+            avatarUrl
+            resourcePath
+            url
+          }
+        `;
 
         return fetch('https://api.github.com/graphql', {
             method: 'POST',
@@ -88,25 +95,13 @@ export class AppService {
     mapData(issues: Issue[]): Promise<Issue[]> {
         return Promise.all(
             issues.map(async issue => {
-                const issueEntity = new Issue();
+                let authorEntity = await this.authorService.preload(issue.author);
+                if (!authorEntity) {
+                    authorEntity = await this.authorService.create(issue.author);
+                    await this.authorService.save(authorEntity);
+                }
 
-                //const authorEntity = new Author();
-                // authorEntity.avatarUrl = issue.author.avatarUrl;
-                // authorEntity.login = issue.author.login;
-                // authorEntity.resourcePath = issue.author.resourcePath;
-                // authorEntity.typename = issue.author.typename;
-                //authorEntity.url = issue.author.url;
-                const authorEntity = await this.authorService.create(issue.author);
-
-                await this.authorService.save(authorEntity);
-
-                issueEntity.id = issue.id;
-                issueEntity.title = issue.title;
-                issueEntity.state = issue.state;
-                issueEntity.createdAt = issue.createdAt;
-                issueEntity.closedAt = issue.closedAt;
-                issueEntity.closed = issue.closed;
-                issueEntity.lastEditedAt = issue.lastEditedAt;
+                const issueEntity = await this.issueService.create(issue);
 
                 issueEntity.author = authorEntity;
 

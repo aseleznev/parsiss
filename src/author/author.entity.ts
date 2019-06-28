@@ -1,9 +1,10 @@
-import { Column, Entity, JoinColumn, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { Issue } from '../issue/issue.entity';
 
 @Entity('author')
 export class Author {
-    @PrimaryColumn({ type: 'varchar' })
+
+    @PrimaryColumn({ unique: true, nullable: false })
     login: string;
 
     @Column({ type: 'varchar', nullable: true })

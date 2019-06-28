@@ -14,4 +14,7 @@ export class IssueService {
     async findAll(): Promise<Issue[]> {
         return await this.issueRepository.find();
     }
+    async create(issue: Issue): Promise<Issue> {
+        return await this.issueRepository.create(issue);
+    }
 }
