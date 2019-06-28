@@ -12,5 +12,6 @@ export default {
     migrationsRun: process.env.TYPEORM_MIGRATIONS_RUN === 'true',
     synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true',
     debug: process.env.TYPEORM_DEBUG === 'true',
-    dropSchema: process.env.TYPEORM_DROP_SCHEMA === 'true'
+    dropSchema: process.env.TYPEORM_DROP_SCHEMA === 'true',
+    logger: process.env.TYPEORM_LOGGER === 'true'
 };

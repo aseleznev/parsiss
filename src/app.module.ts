@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from 'nestjs-config';
 import { IssueModule } from './issue/issue.module';
 import { AuthorModule } from './author/author.module';
+import { CommentModule } from './comment/comment.module';
 import * as path from 'path';
 
 @Module({
@@ -15,7 +16,8 @@ import * as path from 'path';
       inject: [ConfigService]
     }),
     IssueModule,
-    AuthorModule
+    AuthorModule,
+    CommentModule
   ],
   controllers: [AppController],
   providers: [AppService]

@@ -1,28 +1,23 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { Author } from '../author/author.entity';
+import { strict } from 'assert';
 
-@Entity('issue')
-export class Issue {
-    @PrimaryColumn({ type: 'varchar', nullable: false })
+@Entity('comment')
+export class Comment {
+    @PrimaryColumn({ type: 'varchar' })
     id: string;
-
-    @Column({ type: 'varchar', nullable: true })
-    title: string;
-
-    @Column({ type: 'varchar', nullable: true })
-    state: string;
 
     @Column({ type: 'varchar', nullable: true })
     createdAt: string;
 
     @Column({ type: 'varchar', nullable: true })
-    closedAt: string;
-
-    @Column({ type: 'boolean', nullable: true })
-    closed: boolean;
+    lastEditedAt: string;
 
     @Column({ type: 'varchar', nullable: true })
-    lastEditedAt: string;
+    updatedAt: string;
+
+    @Column({ type: 'varchar', nullable: true })
+    bodyHTML: string;
 
     @OneToOne(type => Author, { cascade: true })
     @JoinColumn()

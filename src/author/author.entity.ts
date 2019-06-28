@@ -1,9 +1,8 @@
-import { Column, Entity, JoinColumn, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
 import { Issue } from '../issue/issue.entity';
 
 @Entity('author')
 export class Author {
-
     @PrimaryColumn({ unique: true, nullable: false })
     login: string;
 
@@ -19,7 +18,6 @@ export class Author {
     @Column({ type: 'varchar', nullable: true })
     avatarUrl: string;
 
-    @OneToMany(type => Issue, issue => issue.author)
-    @JoinColumn()
-    issues: Issue[];
+    @OneToOne(type => Issue, issue => issue.author)
+    issue: Issue;
 }

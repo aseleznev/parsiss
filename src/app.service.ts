@@ -30,7 +30,7 @@ export class AppService {
         const query = `
           query parssis($name: String!, $owner: String!) {
             repository(name: $name, owner: $owner) {
-              issues(last: 20, ${beforeIssue}) {
+              issues(last: 40, ${beforeIssue}) {
                 edges {
                   cursor
                 }
@@ -95,19 +95,16 @@ export class AppService {
     mapData(issues: Issue[]): Promise<Issue[]> {
         return Promise.all(
             issues.map(async issue => {
-                let authorEntity = await this.authorService.preload(issue.author);
-                if (!authorEntity) {
-                    authorEntity = await this.authorService.create(issue.author);
-                    await this.authorService.save(authorEntity);
-                }
+                // let authorEntity = await this.authorService.findOne(issue.author.login);
+                // if (authorEntity === undefined) {
+                   const authorEntity = await this.authorService.create(issue.author);
+                //     await this.authorService.save(authorEntity);
+                // }
 
                 const issueEntity = await this.issueService.create(issue);
-
                 issueEntity.author = authorEntity;
 
                 await this.issueService.save(issueEntity);
-
-                console.log(issueEntity);
 
                 return issueEntity;
             })
