@@ -1,5 +1,6 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
 import { Author } from '../author/author.entity';
+import { Comment } from '../comment/comment.entity';
 
 @Entity('issue')
 export class Issue {
@@ -24,7 +25,11 @@ export class Issue {
     @Column({ type: 'varchar', nullable: true })
     lastEditedAt: string;
 
-    @OneToOne(type => Author, { cascade: true })
+    @OneToOne(type => Author)
     @JoinColumn()
     author: Author;
+
+    @OneToMany(type => Comment, comment => comment.issue)
+    @JoinColumn()
+    comments: Comment[];
 }

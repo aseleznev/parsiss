@@ -92,21 +92,23 @@ export class AppService {
             .then(body => this.mapData(body.data.repository.issues.nodes));
     }
 
-    mapData(issues: Issue[]): Promise<Issue[]> {
+    mapData(issues: Issue[]): Promise<Author[]> {
         return Promise.all(
             issues.map(async issue => {
-                // let authorEntity = await this.authorService.findOne(issue.author.login);
-                // if (authorEntity === undefined) {
-                   const authorEntity = await this.authorService.create(issue.author);
-                //     await this.authorService.save(authorEntity);
-                // }
+                let authorEntity = await this.authorService.findOne(issue.author.login);
+                if (authorEntity === undefined) {
+                    const authorEntity = await this.authorService.create(issue.author);
+                    console.log(issue.author);
+                    await this.authorService.save(authorEntity);
+                    console.log(authorEntity);
+                }
 
-                const issueEntity = await this.issueService.create(issue);
-                issueEntity.author = authorEntity;
+                // const issueEntity = await this.issueService.create(issue);
+                // issueEntity.author = authorEntity;
+                //
+                // await this.issueService.save(issueEntity);
 
-                await this.issueService.save(issueEntity);
-
-                return issueEntity;
+                return authorEntity;
             })
         );
     }

@@ -1,5 +1,4 @@
-import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
-import { Issue } from '../issue/issue.entity';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('author')
 export class Author {
@@ -18,6 +17,4 @@ export class Author {
     @Column({ type: 'varchar', nullable: true })
     avatarUrl: string;
 
-    @OneToOne(type => Issue, issue => issue.author)
-    issue: Issue;
 }

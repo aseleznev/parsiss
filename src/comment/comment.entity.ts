@@ -1,6 +1,6 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
 import { Author } from '../author/author.entity';
-import { strict } from 'assert';
+import { Issue } from '../issue/issue.entity';
 
 @Entity('comment')
 export class Comment {
@@ -10,7 +10,10 @@ export class Comment {
     @Column({ type: 'varchar', nullable: true })
     createdAt: string;
 
-    @Column({ type: 'varchar', nullable: true })
+    @Column({
+        type: 'varchar',
+        nullable: true
+    })
     lastEditedAt: string;
 
     @Column({ type: 'varchar', nullable: true })
@@ -22,4 +25,8 @@ export class Comment {
     @OneToOne(type => Author, { cascade: true })
     @JoinColumn()
     author: Author;
+
+    @ManyToOne(type => Issue, { cascade: true })
+    @JoinColumn()
+    issue: Issue;
 }
