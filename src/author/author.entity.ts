@@ -17,4 +17,6 @@ export class Author {
     @Column({ type: 'varchar', nullable: true })
     avatarUrl: string;
 
+
+
 }

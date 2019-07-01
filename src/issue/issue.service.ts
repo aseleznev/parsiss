@@ -7,8 +7,8 @@ import { Repository } from 'typeorm';
 export class IssueService {
     constructor(@InjectRepository(Issue) private readonly issueRepository: Repository<Issue>) {}
 
-    async save(issue: Issue): Promise<Issue> {
-        return await this.issueRepository.save(issue);
+    async save(issues: Issue[]): Promise<Issue[]> {
+        return await this.issueRepository.save(issues);
     }
 
     async findAll(): Promise<Issue[]> {

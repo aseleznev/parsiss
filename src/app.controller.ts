@@ -11,7 +11,7 @@ export class AppController {
   }
 
   @Get('parse')
-  parseIssues(@Res() res): Promise<Issue[]> {
-    return this.appService.parse().then(data => res.json(data));
+  async parseIssues(@Res() res): Promise<Issue[]> {
+    return await this.appService.parse().then(data => res.json(data));
   }
 }

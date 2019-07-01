@@ -19,6 +19,7 @@ export class AppService {
 
     async parse(): Promise<string> {
         const issues = await this.receiveData('typeorm', 'typeorm');
+        await this.issueService.save(issues);
 
         return Promise.resolve(JSON.stringify(issues));
     }
@@ -30,7 +31,7 @@ export class AppService {
         const query = `
           query parssis($name: String!, $owner: String!) {
             repository(name: $name, owner: $owner) {
-              issues(last: 40, ${beforeIssue}) {
+              issues(last: 50, ${beforeIssue}) {
                 edges {
                   cursor
                 }
@@ -92,23 +93,13 @@ export class AppService {
             .then(body => this.mapData(body.data.repository.issues.nodes));
     }
 
-    mapData(issues: Issue[]): Promise<Author[]> {
+    mapData(issues: Issue[]): Promise<Issue[]> {
         return Promise.all(
             issues.map(async issue => {
-                let authorEntity = await this.authorService.findOne(issue.author.login);
-                if (authorEntity === undefined) {
-                    const authorEntity = await this.authorService.create(issue.author);
-                    console.log(issue.author);
-                    await this.authorService.save(authorEntity);
-                    console.log(authorEntity);
-                }
-
-                // const issueEntity = await this.issueService.create(issue);
-                // issueEntity.author = authorEntity;
-                //
-                // await this.issueService.save(issueEntity);
-
-                return authorEntity;
+                const authorEntity = await this.authorService.create(issue.author);
+                const issueEntity = await this.issueService.create(issue);
+                issueEntity.author = authorEntity;
+                return issueEntity;
             })
         );
     }
