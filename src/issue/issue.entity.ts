@@ -8,28 +8,31 @@ export class Issue {
     id: string;
 
     @Column({ type: 'varchar', nullable: true })
-    title: string;
+    title: string | null;
 
     @Column({ type: 'varchar', nullable: true })
-    state: string;
+    state: string | null;
 
     @Column({ type: 'varchar', nullable: true })
-    createdAt: string;
+    createdAt: string | null;
 
     @Column({ type: 'varchar', nullable: true })
-    closedAt: string;
+    closedAt: string | null;
 
     @Column({ type: 'boolean', nullable: true })
-    closed: boolean;
+    closed: boolean | null;
 
     @Column({ type: 'varchar', nullable: true })
-    lastEditedAt: string;
+    lastEditedAt: string | null;
+
+    @Column({ type: 'int', nullable: true })
+    commentsCount: number | null;
 
     @ManyToOne(type => Author, { cascade: true })
     @JoinColumn()
     author: Author;
 
-    @OneToMany(type => Comment, comment => comment.issue)
+    @OneToMany(type => Comment, comment => comment.issue, { cascade: true })
     @JoinColumn()
     comments: Comment[];
 }

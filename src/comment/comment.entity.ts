@@ -22,11 +22,11 @@ export class Comment {
     @Column({ type: 'varchar', nullable: true })
     bodyHTML: string;
 
-    @OneToOne(type => Author, { cascade: true })
+    @ManyToOne(type => Author, { cascade: true })
     @JoinColumn()
     author: Author;
 
-    @ManyToOne(type => Issue, { cascade: true })
+    @ManyToOne(type => Issue)
     @JoinColumn()
     issue: Issue;
 }
