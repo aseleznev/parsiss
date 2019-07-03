@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConfig } from 'nestjs-config';
 import { Issue } from './issue/issue.entity';
+import { Comment } from './comment/comment.entity';
 import { IssueService } from './issue/issue.service';
-import { Author } from './author/author.entity';
 import { AuthorService } from './author/author.service';
 import { CommentService } from './comment/comment.service';
-import { Comment } from './comment/comment.entity';
 
 const fetch = require('node-fetch');
 
@@ -20,21 +19,37 @@ export class AppService {
         this.config = config;
     }
 
-    async parse(): Promise<string> {
-        const body: any = await this.receiveData('typeorm', 'typeorm');
-        const beforeIssue = this.saveIssues(body.data.repository.issues);
+    parse(): Promise<string> {
+        const frameworks = [{ name: 'typeorm', owner: 'typeorm' }];
+        let beforeIssue = '';
+        frameworks.forEach(async framework => {
+            await this.parseFramework(framework.name, framework.owner, beforeIssue);
+        });
 
         return Promise.resolve(JSON.stringify(beforeIssue));
     }
 
-    async receiveData(name: string, owner: string): Promise<string> {
-        const beforeIssue = '';
-        const beforeComment = '';
+    async parseFramework(name: string, owner: string, beforeIssue: string) {
+        const body: any = await this.receiveData(name, owner, beforeIssue);
+
+        let nextBeforeIssue = await this.saveIssues(body.data.repository.issues);
+
+        if (beforeIssue !== nextBeforeIssue) {
+            await this.parseFramework(name, owner, nextBeforeIssue);
+        }
+    }
+
+    async receiveData(name: string, owner: string, beforeIssue: string): Promise<string> {
+        let beforeIssueString: string = '';
+
+        if (beforeIssue) {
+            beforeIssueString = 'before: "' + beforeIssue + '"';
+        }
 
         const query = `
           query parssis($name: String!, $owner: String!) {
             repository(name: $name, owner: $owner) {
-              issues(last: 100, ${beforeIssue}) {
+              issues(last: 100, ${beforeIssueString}) {
                 edges {
                   cursor
                 }
@@ -51,7 +66,7 @@ export class AppService {
                   }
                   state
                   title
-                  comments(last: 100, ${beforeComment}) {
+                  comments(last: 100) {
                     edges {
                       cursor
                     }
@@ -80,7 +95,7 @@ export class AppService {
           }
         `;
 
-        return await fetch('https://api.github.com/graphql', {
+        return fetch('https://api.github.com/graphql', {
             method: 'POST',
             body: JSON.stringify({
                 query: query,
@@ -96,14 +111,11 @@ export class AppService {
     }
 
     async saveIssues(issues: any): Promise<string> {
-
         const issuesEntity = await this.mapIssues(issues.nodes);
 
         await this.issueService.save(issuesEntity);
 
-        const beforeIssue = issues.edges[0];
-
-        return beforeIssue;
+        return issues.edges[0].cursor;
     }
 
     async mapIssues(issues: any[]): Promise<Issue[]> {
