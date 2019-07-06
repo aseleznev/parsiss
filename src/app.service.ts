@@ -5,6 +5,7 @@ import { Comment } from './comment/comment.entity';
 import { IssueService } from './issue/issue.service';
 import { AuthorService } from './author/author.service';
 import { CommentService } from './comment/comment.service';
+import { Author } from './author/author.entity';
 
 const fetch = require('node-fetch');
 
@@ -34,8 +35,10 @@ export class AppService {
 
         let nextBeforeIssue = await this.saveIssues(body.data.repository.issues);
 
-        if (beforeIssue !== nextBeforeIssue) {
+        if (nextBeforeIssue && beforeIssue !== nextBeforeIssue) {
+            //setTimeout(async () => {
             await this.parseFramework(name, owner, nextBeforeIssue);
+            //}, 10000);
         }
     }
 
@@ -43,13 +46,13 @@ export class AppService {
         let beforeIssueString: string = '';
 
         if (beforeIssue) {
-            beforeIssueString = 'before: "' + beforeIssue + '"';
+            beforeIssueString = 'before: "' + beforeIssue + '",';
         }
 
         const query = `
           query parssis($name: String!, $owner: String!) {
             repository(name: $name, owner: $owner) {
-              issues(last: 100, ${beforeIssueString}) {
+              issues(last: 100, ${beforeIssueString} orderBy: {field: CREATED_AT, direction: ASC}) {
                 edges {
                   cursor
                 }
@@ -111,11 +114,14 @@ export class AppService {
     }
 
     async saveIssues(issues: any): Promise<string> {
-        const issuesEntity = await this.mapIssues(issues.nodes);
+        if (issues.nodes.length) {
+            const issuesEntity = await this.mapIssues(issues.nodes);
 
-        await this.issueService.save(issuesEntity);
+            await this.issueService.save(issuesEntity);
 
-        return issues.edges[0].cursor;
+            return issues.edges[0].cursor;
+        }
+        return null;
     }
 
     async mapIssues(issues: any[]): Promise<Issue[]> {
@@ -123,9 +129,16 @@ export class AppService {
             issues.map(async issue => {
                 const issueEntity = await this.issueService.create(issue);
 
-                issueEntity.author = await this.authorService.create(issue.author);
+                if (issue.author) {
+                    issueEntity.author = await this.authorService.create(issue.author);
+                } else {
+                    issueEntity.author = new Author().returnGhost();
+                }
                 issueEntity.commentsCount = issue.comments.totalCount;
-                issueEntity.comments = await this.mapComments(issue.comments.nodes);
+
+                if (issue.comments.nodes.length) {
+                    issueEntity.comments = await this.mapComments(issue.comments.nodes);
+                }
 
                 return issueEntity;
             })
@@ -135,10 +148,13 @@ export class AppService {
     async mapComments(comments: any[]): Promise<Comment[]> {
         return Promise.all(
             comments.map(async comment => {
-                const authorEntity = await this.authorService.create(comment.author);
                 const commentEntity = await this.commentService.create(comment);
 
-                commentEntity.author = authorEntity;
+                if (comment.author) {
+                    commentEntity.author = await this.authorService.create(comment.author);
+                } else {
+                    commentEntity.author = new Author().returnGhost();
+                }
 
                 return commentEntity;
             })

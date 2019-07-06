@@ -1,43 +1,41 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import { Author } from '../author/author.entity';
-import { Comment } from '../comment/comment.entity';
-import { Repo } from '../repo/repo.entity';
+import { Issue } from '../issue/issue.entity';
 
-@Entity('issue')
-export class Issue {
+@Entity('repository')
+export class Repo {
     @PrimaryColumn({ type: 'varchar', nullable: false })
     id: string;
 
     @Column({ type: 'varchar', nullable: true })
-    title: string | null;
+    name: string | null;
 
     @Column({ type: 'varchar', nullable: true })
-    state: string | null;
+    nameWithOwner: string | null;
+
+    @Column({ type: 'varchar', nullable: true })
+    url: string | null;
 
     @Column({ type: 'varchar', nullable: true })
     createdAt: string | null;
 
     @Column({ type: 'varchar', nullable: true })
-    closedAt: string | null;
-
-    @Column({ type: 'boolean', nullable: true })
-    closed: boolean | null;
+    description: string | null;
 
     @Column({ type: 'varchar', nullable: true })
-    lastEditedAt: string | null;
+    descriptionHTML: string | null;
 
-    @Column({ type: 'int', nullable: true })
-    commentsCount: number | null;
+    @Column({ type: 'varchar', nullable: true })
+    homepageUrl: string | null;
+
+    @Column({ type: 'varchar', nullable: true })
+    openGraphImageUrl: string | null;
 
     @ManyToOne(type => Author, { cascade: true })
     @JoinColumn()
     author: Author;
 
-    @ManyToOne(type => Repo, { cascade: true })
+    @OneToMany(type => Issue, issue => issue.repo, { cascade: true })
     @JoinColumn()
-    repo: Repo;
-
-    @OneToMany(type => Comment, comment => comment.issue, { cascade: true })
-    @JoinColumn()
-    comments: Comment[];
+    issues: Issue[];
 }
