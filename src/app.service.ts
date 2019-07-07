@@ -6,6 +6,8 @@ import { IssueService } from './issue/issue.service';
 import { AuthorService } from './author/author.service';
 import { CommentService } from './comment/comment.service';
 import { Author } from './author/author.entity';
+import { RepoService } from './repo/repo.service';
+import { RepoOwnerService } from './repo-owner/repo-owner.service';
 
 const fetch = require('node-fetch');
 
@@ -15,7 +17,9 @@ export class AppService {
         @InjectConfig() private readonly config,
         private readonly issueService: IssueService,
         private readonly authorService: AuthorService,
-        private readonly commentService: CommentService
+        private readonly commentService: CommentService,
+        private readonly repoService: RepoService,
+        private readonly repoOwnerService: RepoOwnerService
     ) {
         this.config = config;
     }
@@ -33,7 +37,7 @@ export class AppService {
     async parseFramework(name: string, owner: string, beforeIssue: string) {
         const body: any = await this.receiveData(name, owner, beforeIssue);
 
-        let nextBeforeIssue = await this.saveIssues(body.data.repository.issues);
+        let nextBeforeIssue = await this.saveIssues(body.data.repository);
 
         if (nextBeforeIssue && beforeIssue !== nextBeforeIssue) {
             //setTimeout(async () => {
@@ -52,7 +56,21 @@ export class AppService {
         const query = `
           query parssis($name: String!, $owner: String!) {
             repository(name: $name, owner: $owner) {
-              issues(last: 100, ${beforeIssueString} orderBy: {field: CREATED_AT, direction: ASC}) {
+             createdAt
+             description
+             descriptionHTML
+             homepageUrl
+             id
+             name
+             nameWithOwner
+             openGraphImageUrl
+             url
+             updatedAt
+             owner{
+               id
+               login
+             }
+             issues(last: 100, ${beforeIssueString} orderBy: {field: CREATED_AT, direction: ASC}) {
                 edges {
                   cursor
                 }
@@ -113,18 +131,22 @@ export class AppService {
         }).then(res => res.json());
     }
 
-    async saveIssues(issues: any): Promise<string> {
-        if (issues.nodes.length) {
-            const issuesEntity = await this.mapIssues(issues.nodes);
+    async saveIssues(repository: any): Promise<string> {
+        const repo = await this.repoService.create(repository);
+        const repoOwner = await this.repoOwnerService.create(repository.owner);
+        repo.owner = repoOwner;
+
+        if (repository.issues.nodes.length) {
+            const issuesEntity = await this.mapIssues(repository.issues.nodes, repo);
 
             await this.issueService.save(issuesEntity);
 
-            return issues.edges[0].cursor;
+            return repository.issues.edges[0].cursor;
         }
         return null;
     }
 
-    async mapIssues(issues: any[]): Promise<Issue[]> {
+    async mapIssues(issues: any[], repo): Promise<Issue[]> {
         return Promise.all(
             issues.map(async issue => {
                 const issueEntity = await this.issueService.create(issue);
@@ -135,6 +157,7 @@ export class AppService {
                     issueEntity.author = new Author().returnGhost();
                 }
                 issueEntity.commentsCount = issue.comments.totalCount;
+                issueEntity.repo = repo;
 
                 if (issue.comments.nodes.length) {
                     issueEntity.comments = await this.mapComments(issue.comments.nodes);

@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
-import { Author } from '../author/author.entity';
 import { Issue } from '../issue/issue.entity';
+import { RepoOwner } from '../repo-owner/repo-owner.entity';
 
 @Entity('repository')
 export class Repo {
@@ -31,11 +31,11 @@ export class Repo {
     @Column({ type: 'varchar', nullable: true })
     openGraphImageUrl: string | null;
 
-    @ManyToOne(type => Author, { cascade: true })
+    @ManyToOne(type => RepoOwner, { cascade: true })
     @JoinColumn()
-    author: Author;
+    owner: RepoOwner;
 
-    @OneToMany(type => Issue, issue => issue.repo, { cascade: true })
+    @OneToMany(type => Issue, issue => issue.repo)
     @JoinColumn()
     issues: Issue[];
 }

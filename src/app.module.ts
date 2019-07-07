@@ -6,10 +6,8 @@ import { ConfigModule, ConfigService } from 'nestjs-config';
 import { IssueModule } from './issue/issue.module';
 import { AuthorModule } from './author/author.module';
 import { CommentModule } from './comment/comment.module';
-import { RepoModule } from './repo/repoModule';
-import { RepoService } from './repo/repo.service';
-import { RepoService } from './repo/repo.service';
-import { RepositoryOwnerModule } from './repository-owner/repository-owner.module';
+import { RepoModule } from './repo/repo.module';
+import { RepoOwnerModule } from './repo-owner/repo-owner.module';
 import * as path from 'path';
 
 @Module({
@@ -23,9 +21,9 @@ import * as path from 'path';
     AuthorModule,
     CommentModule,
     RepoModule,
-    RepositoryOwnerModule
+    RepoOwnerModule
   ],
   controllers: [AppController],
-  providers: [AppService, RepoService]
+  providers: [AppService]
 })
 export class AppModule {}

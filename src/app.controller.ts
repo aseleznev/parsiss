@@ -10,6 +10,11 @@ export class AppController {
     this.config = config;
   }
 
+  @Get()
+  getHello(){
+    return "Hello World!";
+  }
+
   @Get('parse')
   async parseIssues(@Res() res): Promise<Issue[]> {
     return await this.appService.parse().then(data => res.json(data));
