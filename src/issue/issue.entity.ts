@@ -12,6 +12,9 @@ export class Issue {
     title: string | null;
 
     @Column({ type: 'varchar', nullable: true })
+    titleRu: string | null;
+
+    @Column({ type: 'varchar', nullable: true })
     state: string | null;
 
     @Column({ type: 'varchar', nullable: true })
@@ -22,6 +25,9 @@ export class Issue {
 
     @Column({ type: 'boolean', nullable: true })
     closed: boolean | null;
+
+    @Column({ type: 'boolean', nullable: true, default: false })
+    translated: boolean | null;
 
     @Column({ type: 'varchar', nullable: true })
     lastEditedAt: string | null;

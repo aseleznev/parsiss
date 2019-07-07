@@ -8,8 +8,10 @@ import { CommentService } from './comment/comment.service';
 import { Author } from './author/author.entity';
 import { RepoService } from './repo/repo.service';
 import { RepoOwnerService } from './repo-owner/repo-owner.service';
+import to from 'await-to-js';
 
 const fetch = require('node-fetch');
+const translate = require('@vitalets/google-translate-api');
 
 @Injectable()
 export class AppService {
@@ -31,7 +33,34 @@ export class AppService {
             await this.parseFramework(framework.name, framework.owner, beforeIssue);
         });
 
-        return Promise.resolve(JSON.stringify(beforeIssue));
+        return Promise.resolve('done');
+    }
+
+    async translate(): Promise<string> {
+        const issues = await this.issueService.findTenUntranslated();
+
+        const translatedIssues =  await this.translateIssues(issues);
+
+        await this.issueService.save(translatedIssues);
+
+        return Promise.resolve('done');
+    }
+
+    async translateIssues(issues: Issue[]): Promise<Issue[]> {
+        let err, res;
+        return Promise.all(
+            issues.map(async issue => {
+                [err, res] = await to(translate(issue.title, { from: 'en', to: 'ru' }));
+                if (!err) {
+                    console.log(res.text);
+                    issue.titleRu = res.text;
+                    issue.translated = true;
+                } else {
+                    console.error(err);
+                }
+                return issue;
+            })
+        );
     }
 
     async parseFramework(name: string, owner: string, beforeIssue: string) {

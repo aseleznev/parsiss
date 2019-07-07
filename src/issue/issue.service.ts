@@ -14,6 +14,11 @@ export class IssueService {
     async findAll(): Promise<Issue[]> {
         return await this.issueRepository.find();
     }
+
+    async findTenUntranslated(): Promise<Issue[]> {
+        return await this.issueRepository.find({ take: 10, where: { translated: null } });
+    }
+
     async create(issue: Issue): Promise<Issue> {
         return await this.issueRepository.create(issue);
     }
