@@ -15,6 +15,12 @@ export class Issue {
     titleRu: string | null;
 
     @Column({ type: 'varchar', nullable: true })
+    bodyHTML: string | null;
+
+    @Column({ type: 'varchar', nullable: true })
+    bodyHTMLRu: string | null;
+
+    @Column({ type: 'varchar', nullable: true })
     state: string | null;
 
     @Column({ type: 'varchar', nullable: true })

@@ -37,9 +37,14 @@ export class AppService {
     }
 
     async translate(): Promise<string> {
-        const issues = await this.issueService.findTenUntranslated();
+        const issues = await this.issueService.findUntranslated(50);
 
-        const translatedIssues =  await this.translateIssues(issues);
+        let titleString = '';
+        issues.forEach(x => {
+            titleString += x.title + ' *$^$* ';
+        });
+
+        const translatedIssues = await this.translateIssues(issues);
 
         await this.issueService.save(translatedIssues);
 
@@ -116,6 +121,7 @@ export class AppService {
                   }
                   state
                   title
+                  bodyHTML
                   comments(last: 100) {
                     edges {
                       cursor
