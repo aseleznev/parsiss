@@ -37,18 +37,67 @@ export class AppService {
     }
 
     async translate(): Promise<string> {
-        const issues = await this.issueService.findUntranslated(50);
+        const issues = await this.issueService.findUntranslated(10);
 
         let titleString = '';
         issues.forEach(x => {
             titleString += x.title + ' *$^$* ';
         });
 
-        const translatedIssues = await this.translateIssues(issues);
+        let bodyString = '';
+        issues.forEach(x => {
+            bodyString += x.bodyHTML + ' *$^$* ';
+        });
+
+        let commentsString = '';
+        issues.forEach(issue => {
+            issue.comments.forEach(x => {
+                commentsString += x.bodyHTML + ' *$#$* ';
+            });
+            commentsString += ' *$^$* ';
+        });
+
+        const ruTitles = await this.translateString(titleString);
+        const ruBodies = await this.translateString(bodyString);
+        const ruCommentsBodies = await this.translateString(commentsString);
+
+        const ruTitlesAr = ruTitles.split('* $ ^ $ *');
+        const ruBodiesAr = ruBodies.split('* $ ^ $ *');
+        const ruComments = ruCommentsBodies.split('* $ ^ $ *');
+        const ruCommentsAr = ruComments.map(issue => {
+            return issue.split('* $ # $ *');
+        });
+
+        const translatedIssues = Promise.all(
+            issues.map(async (issue, IssueIndex) => {
+                issue.titleRu = ruTitlesAr[IssueIndex];
+                issue.bodyHTMLRu = ruBodiesAr[IssueIndex];
+                const comments = await this.commentService.findAllByIssue(issue);
+                issue.comments = comments.map((comment, commentIndex) => {
+                    comment.bodyHTMLRu = ruCommentsAr[IssueIndex][commentIndex];
+                    return comment;
+                });
+                return issue;
+            })
+        );
+
+        //const translatedIssues = await this.translateIssues(issues);
 
         await this.issueService.save(translatedIssues);
 
         return Promise.resolve('done');
+    }
+
+    async translateString(issues: string): Promise<string> {
+        let err, res;
+        [err, res] = await to(translate(issues, { from: 'en', to: 'ru' }));
+        if (!err) {
+            console.log(res.text);
+            return res.text;
+        } else {
+            console.error(err);
+            throw err;
+        }
     }
 
     async translateIssues(issues: Issue[]): Promise<Issue[]> {

@@ -22,6 +22,9 @@ export class Comment {
     @Column({ type: 'varchar', nullable: true })
     bodyHTML: string;
 
+    @Column({ type: 'varchar', nullable: true })
+    bodyHTMLRu: string;
+
     @ManyToOne(type => Author, { cascade: true })
     @JoinColumn()
     author: Author;
