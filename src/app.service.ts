@@ -36,8 +36,22 @@ export class AppService {
         return Promise.resolve('done');
     }
 
-    async translate(): Promise<string> {
-        const issues = await this.issueService.findUntranslated(10);
+    async translate(take: number = 5): Promise<string> {
+        const issues = await this.issueService.findUntranslated(take);
+
+        let commentsString = '';
+        issues.forEach(issue => {
+            issue.comments.forEach(x => {
+                commentsString += x.bodyHTML + ' *$#$* ';
+            });
+            commentsString += ' *$^$* ';
+        });
+
+        console.log(commentsString.length);
+
+        if (commentsString.length>5000){
+            this.translate(take-1);
+        }
 
         let titleString = '';
         issues.forEach(x => {
@@ -47,14 +61,6 @@ export class AppService {
         let bodyString = '';
         issues.forEach(x => {
             bodyString += x.bodyHTML + ' *$^$* ';
-        });
-
-        let commentsString = '';
-        issues.forEach(issue => {
-            issue.comments.forEach(x => {
-                commentsString += x.bodyHTML + ' *$#$* ';
-            });
-            commentsString += ' *$^$* ';
         });
 
         const ruTitles = await this.translateString(titleString);
@@ -68,24 +74,28 @@ export class AppService {
             return issue.split('* $ # $ *');
         });
 
-        const translatedIssues = Promise.all(
-            issues.map(async (issue, IssueIndex) => {
-                issue.titleRu = ruTitlesAr[IssueIndex];
-                issue.bodyHTMLRu = ruBodiesAr[IssueIndex];
-                const comments = await this.commentService.findAllByIssue(issue);
-                issue.comments = comments.map((comment, commentIndex) => {
-                    comment.bodyHTMLRu = ruCommentsAr[IssueIndex][commentIndex];
-                    return comment;
-                });
-                return issue;
-            })
-        );
+        const translatedIssues = await this.mapTranslatedIssues(issues, ruTitlesAr, ruBodiesAr, ruCommentsAr);
 
         //const translatedIssues = await this.translateIssues(issues);
 
         await this.issueService.save(translatedIssues);
 
         return Promise.resolve('done');
+    }
+
+    async mapTranslatedIssues(issues: Issue[], ruTitlesAr: any[], ruBodiesAr: any[], ruCommentsAr: any[]){
+      return Promise.all(
+        issues.map(async (issue, IssueIndex) => {
+          issue.titleRu = ruTitlesAr[IssueIndex];
+          issue.bodyHTMLRu = ruBodiesAr[IssueIndex];
+          const comments = await this.commentService.findAllByIssue(issue);
+          issue.comments = comments.map((comment, commentIndex) => {
+            comment.bodyHTMLRu = ruCommentsAr[IssueIndex][commentIndex];
+            return comment;
+          });
+          return issue;
+        })
+      );
     }
 
     async translateString(issues: string): Promise<string> {
