@@ -20,8 +20,9 @@ export class IssueService {
         return await this.issueRepository
             .createQueryBuilder('issue')
             .leftJoinAndMapMany('issue.comments', 'comment', 'comment.bodyHTMLLength < 5000')
+            .where('issue.translated = :translated', { translated: false })
+            .take(take)
             .getMany();
-
     }
 
     async create(issue: Issue): Promise<Issue> {
