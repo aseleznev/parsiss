@@ -26,17 +26,15 @@ export class AppService {
         this.config = config;
     }
 
-    parse(): Promise<string> {
+    async parse(): Promise<void> {
         const frameworks = [{ name: 'typeorm', owner: 'typeorm' }];
         let beforeIssue = '';
         frameworks.forEach(async framework => {
             await this.parseFramework(framework.name, framework.owner, beforeIssue);
         });
-
-        return Promise.resolve('done');
     }
 
-    async translate(take: number = 5): Promise<string> {
+    async translate(take: number = 5): Promise<void> {
         const issues = await this.issueService.findUntranslated(take);
 
         let commentsString = '';
@@ -47,10 +45,10 @@ export class AppService {
             commentsString += ' *$^$* ';
         });
 
-        console.log(commentsString.length);
+        console.log('comment body - ' + commentsString.length);
 
-        if (commentsString.length>5000){
-            this.translate(take-1);
+        if (commentsString.length > 5000) {
+            this.translate(take - 1);
         }
 
         let titleString = '';
@@ -58,10 +56,22 @@ export class AppService {
             titleString += x.title + ' *$^$* ';
         });
 
+        console.log('issue title - ' + titleString.length);
+
+        if (titleString.length > 5000) {
+            this.translate(take - 1);
+        }
+
         let bodyString = '';
         issues.forEach(x => {
             bodyString += x.bodyHTML + ' *$^$* ';
         });
+
+        console.log('issue body - ' + bodyString.length);
+
+        if (bodyString.length > 5000) {
+            this.translate(take - 1);
+        }
 
         const ruTitles = await this.translateString(titleString);
         const ruBodies = await this.translateString(bodyString);
@@ -79,23 +89,25 @@ export class AppService {
         //const translatedIssues = await this.translateIssues(issues);
 
         await this.issueService.save(translatedIssues);
-
-        return Promise.resolve('done');
     }
 
-    async mapTranslatedIssues(issues: Issue[], ruTitlesAr: any[], ruBodiesAr: any[], ruCommentsAr: any[]){
-      return Promise.all(
-        issues.map(async (issue, IssueIndex) => {
-          issue.titleRu = ruTitlesAr[IssueIndex];
-          issue.bodyHTMLRu = ruBodiesAr[IssueIndex];
-          const comments = await this.commentService.findAllByIssue(issue);
-          issue.comments = comments.map((comment, commentIndex) => {
-            comment.bodyHTMLRu = ruCommentsAr[IssueIndex][commentIndex];
-            return comment;
-          });
-          return issue;
-        })
-      );
+    async mapTranslatedIssues(issues: Issue[], ruTitlesAr: any[], ruBodiesAr: any[], ruCommentsAr: any[]) {
+        return Promise.all(
+            issues.map(async (issue, IssueIndex) => {
+                issue.titleRu = ruTitlesAr[IssueIndex];
+                issue.bodyHTMLRu = ruBodiesAr[IssueIndex];
+                issue.translated = true;
+
+                const comments = await this.commentService.findAllByIssue(issue);
+
+                issue.comments = comments.map((comment, commentIndex) => {
+                    comment.bodyHTMLRu = ruCommentsAr[IssueIndex][commentIndex];
+                    comment.translated = true;
+                    return comment;
+                });
+                return issue;
+            })
+        );
     }
 
     async translateString(issues: string): Promise<string> {
@@ -178,6 +190,7 @@ export class AppService {
                   author {
                     ...authorFields
                   }
+                  url
                   state
                   title
                   bodyHTML
@@ -191,6 +204,7 @@ export class AppService {
                       createdAt
                       lastEditedAt
                       updatedAt
+                      url
                       author {
                         ...authorFields
                       }
@@ -252,6 +266,8 @@ export class AppService {
                 }
                 issueEntity.commentsCount = issue.comments.totalCount;
                 issueEntity.repo = repo;
+                issueEntity.bodyHTMLLength = issueEntity.bodyHTML.length;
+                issueEntity.titleLength = issueEntity.title.length;
 
                 if (issue.comments.nodes.length) {
                     issueEntity.comments = await this.mapComments(issue.comments.nodes);
@@ -272,6 +288,7 @@ export class AppService {
                 } else {
                     commentEntity.author = new Author().returnGhost();
                 }
+                commentEntity.bodyHTMLLength = commentEntity.bodyHTML.length;
 
                 return commentEntity;
             })

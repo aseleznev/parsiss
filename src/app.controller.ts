@@ -15,27 +15,15 @@ export class AppController {
 
     @Get('parse')
     async parse(@Res() res): Promise<string> {
-        return await this.appService.parse().then(data => res.json(data));
+        return await this.appService.parse().then(() => res.json('done'));
     }
 
     @Get('translate')
     async translate(@Res() res): Promise<string> {
-        return await this.appService.translate().then(data => res.json(data));
+        return await this.appService.translate().then(() => res.json('done'));
     }
 
     @Get('test')
     test() {
-        const translate = require('@vitalets/google-translate-api');
-
-        translate('Ik spreek Engels', { to: 'en' })
-            .then(res => {
-                console.log(res.text);
-                //=> I speak English
-                console.log(res.from.language.iso);
-                //=> nl
-            })
-            .catch(err => {
-                console.error(err);
-            });
     }
 }

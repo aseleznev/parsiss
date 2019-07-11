@@ -22,8 +22,17 @@ export class Comment {
     @Column({ type: 'varchar', nullable: true })
     bodyHTML: string;
 
+    @Column({ type: 'int', nullable: true })
+    bodyHTMLLength: number = 0;
+
     @Column({ type: 'varchar', nullable: true })
     bodyHTMLRu: string;
+
+    @Column({ type: 'varchar', nullable: true })
+    url: string;
+
+    @Column({ type: 'boolean', nullable: true, default: false })
+    translated: boolean | null = false;
 
     @ManyToOne(type => Author, { cascade: true })
     @JoinColumn()

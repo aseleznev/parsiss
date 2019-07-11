@@ -11,11 +11,17 @@ export class Issue {
     @Column({ type: 'varchar', nullable: true })
     title: string | null;
 
+    @Column({ type: 'int', nullable: true })
+    titleLength: number | null = 0;
+
     @Column({ type: 'varchar', nullable: true })
     titleRu: string | null;
 
     @Column({ type: 'varchar', nullable: true })
     bodyHTML: string | null;
+
+    @Column({ type: 'int', nullable: true })
+    bodyHTMLLength: number | null = 0;
 
     @Column({ type: 'varchar', nullable: true })
     bodyHTMLRu: string | null;
@@ -33,13 +39,16 @@ export class Issue {
     closed: boolean | null;
 
     @Column({ type: 'boolean', nullable: true, default: false })
-    translated: boolean | null;
+    translated: boolean | null = false;
 
     @Column({ type: 'varchar', nullable: true })
     lastEditedAt: string | null;
 
     @Column({ type: 'int', nullable: true })
     commentsCount: number | null;
+
+    @Column({ type: 'varchar', nullable: true })
+    url: string;
 
     @ManyToOne(type => Author, { cascade: true })
     @JoinColumn()
