@@ -49,6 +49,7 @@ export class AppService {
 
         if (commentsString.length > 5000) {
             this.translate(take - 1);
+            return;
         }
 
         let titleString = '';
@@ -60,6 +61,7 @@ export class AppService {
 
         if (titleString.length > 5000) {
             this.translate(take - 1);
+            return;
         }
 
         let bodyString = '';
@@ -71,6 +73,7 @@ export class AppService {
 
         if (bodyString.length > 5000) {
             this.translate(take - 1);
+            return;
         }
 
         const ruTitles = await this.translateString(titleString);

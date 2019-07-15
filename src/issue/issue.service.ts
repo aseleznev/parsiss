@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Issue } from './issue.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { createQueryBuilder, getRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class IssueService {
@@ -19,8 +19,9 @@ export class IssueService {
         //return await this.issueRepository.find({ take, where: { translated: false }, relations: ['comments'] });
         return await this.issueRepository
             .createQueryBuilder('issue')
-            .leftJoinAndMapMany('issue.comments', 'comment', 'comment.bodyHTMLLength < 5000')
+            .leftJoinAndSelect('issue.comments', 'comment')
             .where('issue.translated = :translated', { translated: false })
+            .andWhere('comment.bodyHTMLLength < 4000')
             .take(take)
             .getMany();
     }
