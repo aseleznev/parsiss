@@ -32,12 +32,14 @@ export class AppService {
 
     async parseRepos(since: number = 0): Promise<void> {
         console.log(since);
-        const body: any = await this.receiveReposData(since);
+        const body: any[] = await this.receiveReposData(since);
 
-        let nextSince = await this.saveRepos(body);
+        if (body.length) {
+            let nextSince = await this.saveRepos(body);
 
-        if (nextSince && since !== nextSince) {
-            await this.parseRepos(nextSince);
+            if (nextSince && since !== nextSince) {
+                await this.parseRepos(nextSince);
+            }
         }
     }
 
@@ -63,7 +65,7 @@ export class AppService {
         );
     }
 
-    async receiveReposData(since: number = 0): Promise<string> {
+    async receiveReposData(since: number = 0): Promise<any[]> {
         return fetch(`https://api.github.com/repositories?since=${since}`, {
             method: 'GET',
             headers: {
