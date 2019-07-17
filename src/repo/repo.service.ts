@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { Repo } from './repo.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -15,7 +15,7 @@ export class RepoService {
         return await this.repoRepository.find();
     }
 
-    async create(repo: Repo): Promise<Repo> {
+    async create(repo: DeepPartial<Repo>): Promise<Repo> {
         return await this.repoRepository.create(repo);
     }
 }

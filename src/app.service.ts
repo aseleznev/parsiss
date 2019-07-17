@@ -26,11 +26,58 @@ export class AppService {
         this.config = config;
     }
 
+    async parseReposRest(): Promise<void> {
+        await this.parseRepos(0);
+    }
+
+    async parseRepos(since: number = 0): Promise<void> {
+        console.log(since);
+        const body: any = await this.receiveReposData(since);
+
+        let nextSince = await this.saveRepos(body);
+
+        if (nextSince && since !== nextSince) {
+            await this.parseRepos(nextSince);
+        }
+    }
+
+    async saveRepos(body: any[]): Promise<number> {
+        const repos = await this.mapRepos(body);
+
+        await this.repoService.save(repos);
+
+        return body.pop().id;
+    }
+
+    async mapRepos(body: any[]) {
+        return Promise.all(
+            body.map(async repoData => {
+                const repo = await this.repoService.create({ id: repoData.node_id, name: repoData.name });
+                const repoOwner = await this.repoOwnerService.create({
+                    id: repoData.owner.node_id,
+                    login: repoData.owner.login
+                });
+                repo.owner = repoOwner;
+                return repo;
+            })
+        );
+    }
+
+    async receiveReposData(since: number = 0): Promise<string> {
+        return fetch(`https://api.github.com/repositories?since=${since}`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${this.config.get('app.accessToken')}`
+                //Accept: `application/vnd.github.mercy-preview+json`
+            }
+        }).then(res => res.json());
+    }
+
     async parse(): Promise<void> {
         const frameworks = [{ name: 'typeorm', owner: 'typeorm' }];
         let beforeIssue = '';
         frameworks.forEach(async framework => {
-            await this.parseFramework(framework.name, framework.owner, beforeIssue);
+            await this.parseRepo(framework.name, framework.owner, beforeIssue);
         });
     }
 
@@ -142,15 +189,13 @@ export class AppService {
         );
     }
 
-    async parseFramework(name: string, owner: string, beforeIssue: string) {
+    async parseRepo(name: string, owner: string, beforeIssue: string) {
         const body: any = await this.receiveData(name, owner, beforeIssue);
 
         let nextBeforeIssue = await this.saveIssues(body.data.repository);
 
         if (nextBeforeIssue && beforeIssue !== nextBeforeIssue) {
-            //setTimeout(async () => {
-            await this.parseFramework(name, owner, nextBeforeIssue);
-            //}, 10000);
+            await this.parseRepo(name, owner, nextBeforeIssue);
         }
     }
 

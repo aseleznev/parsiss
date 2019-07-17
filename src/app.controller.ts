@@ -18,12 +18,16 @@ export class AppController {
         return await this.appService.parse().then(() => res.json('done'));
     }
 
+    @Get('parseRepos')
+    async parseRepos(@Res() res): Promise<string> {
+        return await this.appService.parseReposRest().then((result) => res.json(result));
+    }
+
     @Get('translate')
     async translate(@Res() res): Promise<string> {
         return await this.appService.translate().then(() => res.json('done'));
     }
 
     @Get('test')
-    test() {
-    }
+    test() {}
 }
